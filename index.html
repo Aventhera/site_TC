@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechCare</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 2rem;
+            text-align: center;
+        }
+        #history {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 1rem;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div id="content">
+        <h1>TechCare</h1>
+        <p id="message">Chargement de la couleur...</p>
+    </div>
+    <div id="history"></div>
+
+    <script>
+        // Fonction pour récupérer les données de l'API
+        const fetchData = async () => {
+            try {
+                const response = await fetch("/api/weekly-color", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" }
+                });
+                const { color, history } = await response.json();
+
+                // Mettre à jour l'interface avec les données récupérées
+                document.body.style.backgroundColor = color;
+                document.getElementById("message").textContent = `La couleur de cette semaine est ${color}.`;
+
+                const historyDiv = document.getElementById("history");
+                if (history.length > 0) {
+                    historyDiv.innerHTML = `<strong>Historique des couleurs :</strong><br>`;
+                    history.slice(-5).forEach(entry => {
+                        historyDiv.innerHTML += `Semaine ${entry.week} : <span style="color: ${entry.color}">${entry.color}</span><br>`;
+                    });
+                } else {
+                    historyDiv.innerHTML = `<em>Aucun historique pour le moment.</em>`;
+                }
+            } catch (error) {
+                console.error("Erreur lors de la récupération des données :", error);
+                document.getElementById("message").textContent = "Impossible de charger les données.";
+            }
+        };
+
+        // Charger les données au chargement de la page
+        fetchData();
+    </script>
+</body>
+</html>

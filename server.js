@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const path = require("path"); // Nécessaire pour gérer les fichiers statiques
 
 const app = express();
 app.use(cors());
@@ -23,16 +24,9 @@ const getCurrentWeek = () => {
     return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
 };
 
-// Route principale
-app.get("/", (req, res) => {
-    res.send("Bienvenue sur l'API TechCare ! Accédez à /api/weekly-color avec une requête POST pour voir la couleur de la semaine.");
-});
-
-// Endpoint pour la couleur hebdomadaire
-app.post("/api/weekly-color", (req, res) => {
+// Mise à jour de la couleur hebdomadaire
+const updateWeeklyColor = () => {
     const currentWeek = getCurrentWeek();
-
-    // Mise à jour si la semaine a changé
     if (colorData.week !== currentWeek) {
         const newColor = colors[Math.floor(Math.random() * colors.length)];
         if (colorData.color) {
@@ -44,7 +38,17 @@ app.post("/api/weekly-color", (req, res) => {
             history: colorData.history
         };
     }
+};
 
+// Servir le fichier HTML pour la route `/`
+app.get("/", (req, res) => {
+    updateWeeklyColor(); // Met à jour la couleur avant de servir la page
+    res.sendFile(path.join(__dirname, "index.html")); // Envoie le fichier HTML
+});
+
+// Endpoint pour l'API (couleur et historique)
+app.post("/api/weekly-color", (req, res) => {
+    updateWeeklyColor(); // Met à jour la couleur si nécessaire
     res.json({ color: colorData.color, history: colorData.history });
 });
 
